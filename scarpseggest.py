@@ -71,13 +71,15 @@ def single_suggest(query, lang, source):
     elif source == 'news':
         result = get_news_suggestion(query, language['code'], language['country'])
     return result[1:]
+
+heb_chars="אבגדהוזחטיכלמנסעפצקרשת"
  
 def single_letter_recursive_suggest(query,  source,language='en'):
     """Get suggestion and expand the query """
     
     selected_language = {"code":"en","tld":"com"}
     expansion = []
-    chars = ascii_lowercase
+    chars = heb_chars
     
     try:
         if source == 'web':
@@ -87,16 +89,17 @@ def single_letter_recursive_suggest(query,  source,language='en'):
         elif source == 'news':
             gweb = get_news_suggestion(query, selected_language['code'], selected_language['country'])
         for letter in chars:
-            exp_query = query + ' ' + letter 
-            if source == 'web':
-                suggestions = get_suggestion(exp_query, selected_language['code'], selected_language['tld'])
-            elif source == 'pr':
-                suggestions = get_suggestion(query, selected_language['code'], selected_language['tld'], ds='pr')
-            elif source == 'news':
-                suggestions = get_news_suggestion(exp_query, selected_language['code'], selected_language['country'])
-            if suggestions:
-                expansion.append((letter, suggestions))
- 
+            for l in chars:
+                exp_query = query + ' ' + letter +l
+                if source == 'web':
+                    suggestions = get_suggestion(exp_query, selected_language['code'], selected_language['tld'])
+                elif source == 'pr':
+                    suggestions = get_suggestion(query, selected_language['code'], selected_language['tld'], ds='pr')
+                elif source == 'news':
+                    suggestions = get_news_suggestion(exp_query, selected_language['code'], selected_language['country'])
+                if suggestions:
+                    expansion.append((letter, suggestions))
+     
     except (IOError, ValueError), e:
         gweb = ''
         expansion = ''
@@ -106,6 +109,7 @@ def single_letter_recursive_suggest(query,  source,language='en'):
     for ex in data['expansion']:
         expansion_words.extend(ex[1])
     return expansion_words
+
 def saveToFile(lis):
     with open('f.txt','a+') as f:
         for x in lis:
